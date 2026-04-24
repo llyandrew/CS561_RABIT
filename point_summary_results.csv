@@ -1,0 +1,9 @@
+query_name,query_type,method,avg_time_sec
+q_eq_20,point,bitmap,0.01667056083679199
+q_eq_20,point,scan,0.006098413467407226
+q_eq_24,point,bitmap,0.015960884094238282
+q_eq_24,point,scan,0.0038704872131347656
+q_eq_30,point,bitmap,0.015778636932373045
+q_eq_30,point,scan,0.0037984848022460938
+q_eq_40,point,bitmap,0.015691137313842772
+q_eq_40,point,scan,0.0037462711334228516
