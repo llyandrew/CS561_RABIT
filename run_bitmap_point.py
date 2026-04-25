@@ -6,7 +6,6 @@ import pandas as pd
 DB_FILE = "tpch.duckdb"
 RUNS = 5
 
-# 你要測的 point query 組合
 POINT_QUERY_CONFIGS = [
     {"name": "q_eq_20", "quantity_value": 20},
     {"name": "q_eq_24", "quantity_value": 24},
@@ -16,9 +15,7 @@ POINT_QUERY_CONFIGS = [
 
 
 def load_data_once(con):
-    """
-    只載入一次資料
-    """
+
     df = con.execute("""
         SELECT l_extendedprice, l_discount, l_quantity
         FROM lineitem
@@ -33,9 +30,7 @@ def load_data_once(con):
 
 
 def run_scan_point(con, quantity_value):
-    """
-    DuckDB 直接跑 point query
-    """
+
     sql = f"""
     SELECT SUM(l_extendedprice * l_discount)
     FROM lineitem
@@ -50,9 +45,7 @@ def run_scan_point(con, quantity_value):
 
 
 def run_bitmap_point_cached(data, quantity_value):
-    """
-    用已經載入的 numpy array 做 point query
-    """
+
     price = data["price"]
     discount = data["discount"]
     quantity = data["quantity"]
