@@ -14,9 +14,7 @@ QUERY_CONFIGS = [
 ]
 
 
-# ---------------------------
-# Load Data
-# ---------------------------
+#Load data
 def load_data_once(con):
     df = con.execute("""
         SELECT l_extendedprice, l_discount, l_quantity
@@ -30,9 +28,8 @@ def load_data_once(con):
     }
 
 
-# ---------------------------
-# Scan (DuckDB)
-# ---------------------------
+
+#scan
 def run_scan(con, discount_low, discount_high, quantity_threshold):
     sql = f"""
     SELECT SUM(l_extendedprice * l_discount)
@@ -48,9 +45,8 @@ def run_scan(con, discount_low, discount_high, quantity_threshold):
     return end - start, result
 
 
-# ---------------------------
-# Bitmap (on-the-fly)
-# ---------------------------
+
+#bitmap (on the fly)
 def run_bitmap_cached(data, discount_low, discount_high, quantity_threshold):
     price = data["price"]
     discount = data["discount"]
@@ -68,9 +64,7 @@ def run_bitmap_cached(data, discount_low, discount_high, quantity_threshold):
     return end - start, result
 
 
-# ---------------------------
-# RABIT (safe version)
-# ---------------------------
+#RABIT
 def rabit_range_bitmap_safe(discount, low, high):
     return (discount >= low) & (discount <= high)
 
@@ -92,9 +86,7 @@ def run_rabit_cached(data, discount_low, discount_high, quantity_threshold):
     return end - start, result
 
 
-# ---------------------------
-# CUBIT-like (RLE Compression)
-# ---------------------------
+#CUBIT (test now)
 def compress_bitmap(bitmap):
     compressed = []
     count = 1
@@ -144,9 +136,6 @@ def run_cubit_like(data, discount_low, discount_high, quantity_threshold):
     return end - start, result
 
 
-# ---------------------------
-# Benchmark Functions
-# ---------------------------
 def benchmark(func, *args, runs=5):
     times = []
     results = []
@@ -159,9 +148,6 @@ def benchmark(func, *args, runs=5):
     return times, results
 
 
-# ---------------------------
-# Main
-# ---------------------------
 def main():
     con = duckdb.connect(DB_FILE)
 
