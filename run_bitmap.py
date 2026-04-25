@@ -7,7 +7,6 @@ import os
 DB_FILE = "tpch.duckdb"
 RUNS = 5
 
-# 4 組 selectivity
 QUERY_CONFIGS = [
     {"name": "very_narrow", "discount_low": 0.05, "discount_high": 0.051, "quantity_threshold": 24},
     {"name": "narrow",      "discount_low": 0.05, "discount_high": 0.055, "quantity_threshold": 24},
@@ -17,9 +16,6 @@ QUERY_CONFIGS = [
 
 
 def load_data_once(con):
-    """
-    只在程式一開始載入一次資料
-    """
     df = con.execute("""
         SELECT l_extendedprice, l_discount, l_quantity
         FROM lineitem
@@ -34,9 +30,7 @@ def load_data_once(con):
 
 
 def run_scan(con, discount_low, discount_high, quantity_threshold):
-    """
-    直接讓 DuckDB 跑 SQL scan
-    """
+
     sql = f"""
     SELECT SUM(l_extendedprice * l_discount)
     FROM lineitem
@@ -52,10 +46,9 @@ def run_scan(con, discount_low, discount_high, quantity_threshold):
 
 
 def run_bitmap_cached(data, discount_low, discount_high, quantity_threshold):
-    """
-    不再從 DuckDB 抓資料
-    直接用已經載入好的 numpy array 做 bitmap/filter
-    """
+
+    #numpy array do bitmap/filter
+
     price = data["price"]
     discount = data["discount"]
     quantity = data["quantity"]
@@ -110,7 +103,6 @@ def benchmark_bitmap(data, config, runs=5):
 def main():
     con = duckdb.connect(DB_FILE)
 
-    # 只載入一次
     print("Loading data once from DuckDB...")
     data = load_data_once(con)
     print("Data loaded.")
