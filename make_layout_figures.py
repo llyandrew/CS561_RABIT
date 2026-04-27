@@ -1,9 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+import os
 
 RESULTS_FILE = "layout_selectivity_results.csv"
 SUMMARY_FILE = "layout_selectivity_summary.csv"
+
+FIG_DIR = "figures"
+os.makedirs(FIG_DIR, exist_ok=True)
+
+CSV_DIR = "csv"
+os.makedirs(CSV_DIR, exist_ok=True)
 
 results_df = pd.read_csv(RESULTS_FILE)
 summary_df = pd.read_csv(SUMMARY_FILE)
@@ -51,7 +58,7 @@ else:
     print("Warning: some queries have mismatched results across methods.")
     print(correctness[correctness["num_distinct_results"] != 1])
 
-correctness.to_csv("layout_correctness_check.csv", index=False)
+correctness.to_csv(os.path.join(CSV_DIR, "layout_correctness_check.csv"), index=False)
 
 # save report table
 table_df = (
@@ -77,9 +84,9 @@ for c in method_order:
     if c in table_df_rounded.columns:
         table_df_rounded[c] = table_df_rounded[c].round(6)
 
-table_df_rounded.to_csv("table_layout_selectivity.csv", index=False)
+table_df_rounded.to_csv(os.path.join(FIG_DIR, "table_layout_selectivity.csv"), index=False)
 
-with open("table_layout_selectivity.md", "w") as f:
+with open(os.path.join(CSV_DIR, "table_layout_selectivity.md"), "w") as f:
     f.write(table_df_rounded.to_markdown(index=False))
 
 print("\nSaved tables:")
@@ -116,7 +123,7 @@ for layout in ["Random", "Sorted", "Block-Sorted"]:
         plt.legend()
 
     plt.tight_layout()
-    filename = f"figure_{layout.lower().replace('-', '_')}_layout.png"
+    filename = os.path.join(FIG_DIR, f"figure_{layout.lower().replace('-', '_')}_layout.png")
     plt.savefig(filename, dpi=200)
     plt.close()
     print(f"Saved: {filename}")
@@ -151,7 +158,7 @@ for method in method_order:
         plt.legend()
 
     plt.tight_layout()
-    filename = f"figure_{method}_layout_compare.png"
+    filename = os.path.join(FIG_DIR, f"figure_{method}_layout_compare.png")
     plt.savefig(filename, dpi=200)
     plt.close()
     print(f"Saved: {filename}")
@@ -170,7 +177,7 @@ print("\nSpeedup columns:", speedup_df.columns.tolist())
 
 speedup_df["bitmap_over_rabit_speedup"] = speedup_df["bitmap"] / speedup_df["rabit_like"]
 speedup_df["bitmap_over_rabit_speedup"] = speedup_df["bitmap_over_rabit_speedup"].round(4)
-speedup_df.to_csv("table_bitmap_rabit_speedup.csv", index=False)
+speedup_df.to_csv(os.path.join(CSV_DIR, "table_bitmap_rabit_speedup.csv"), index=False)
 
 plt.figure(figsize=(8, 5))
 for layout in ["Random", "Sorted", "Block-Sorted"]:
@@ -190,7 +197,7 @@ plt.title("Speedup of RABIT over Bitmap")
 plt.xticks(selectivity_order, [f"{v}%" for v in selectivity_order])
 plt.legend()
 plt.tight_layout()
-plt.savefig("figure_bitmap_vs_rabit_speedup.png", dpi=200)
+plt.savefig(os.path.join(FIG_DIR, "figure_bitmap_vs_rabit_speedup.png"), dpi=200)
 plt.close()
 print("Saved: figure_bitmap_vs_rabit_speedup.png")
 
@@ -204,8 +211,7 @@ mean_by_layout_method = (
 print("\nAverage time by layout")
 print(mean_by_layout_method.to_string(index=False))
 
-mean_by_layout_method.to_csv("table_mean_by_layout_method.csv", index=False)
-
+mean_by_layout_method.to_csv(os.path.join(CSV_DIR, "table_mean_by_layout_method.csv"), index=False)
 print("\nSaved:")
 print("- layout_correctness_check.csv")
 print("- table_mean_by_layout_method.csv")

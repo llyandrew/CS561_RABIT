@@ -7,6 +7,9 @@ import os
 DB_FILE = "tpch.duckdb"
 RUNS = 5
 
+CSV_DIR = "csv"
+os.makedirs(CSV_DIR, exist_ok=True)
+
 QUERY_CONFIGS = [
     {"name": "very_narrow", "discount_low": 0.05, "discount_high": 0.051, "quantity_threshold": 24},
     {"name": "narrow",      "discount_low": 0.05, "discount_high": 0.055, "quantity_threshold": 24},
@@ -141,8 +144,8 @@ def main():
                 "result": bitmap_results[i]
             })
 
-    result_df = pd.DataFrame(rows)
-    result_df.to_csv("results.csv", index=False)
+    result_df.to_csv(os.path.join(CSV_DIR, "results.csv"), index=False)
+    summary_df.to_csv(os.path.join(CSV_DIR, "summary_results.csv"), index=False)
 
     summary_df = (
         result_df.groupby(["query_name", "method"], as_index=False)["time_sec"]
