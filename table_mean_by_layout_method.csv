@@ -1,0 +1,10 @@
+layout,method,avg_time_sec
+Block-Sorted,bitmap,0.01269238524966765
+Block-Sorted,rabit_like,0.00688843594657045
+Block-Sorted,scan,0.00226059224870465
+Random,bitmap,0.015979044967227452
+Random,rabit_like,0.007132735517289858
+Random,scan,0.0044944286346435165
+Sorted,bitmap,0.012580878204769509
+Sorted,rabit_like,0.00687397188610495
+Sorted,scan,0.0020789106686909414
