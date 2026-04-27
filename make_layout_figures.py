@@ -2,19 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import re
 
-# =========================================================
 RESULTS_FILE = "layout_selectivity_results.csv"
 SUMMARY_FILE = "layout_selectivity_summary.csv"
 
-# =========================================================
-# Read data
-# =========================================================
 results_df = pd.read_csv(RESULTS_FILE)
 summary_df = pd.read_csv(SUMMARY_FILE)
 
-# =========================================================
-# Helper mappings
-# =========================================================
 layout_map = {
     "t_layout_random": "Random",
     "t_layout_sorted": "Sorted",
@@ -22,36 +15,30 @@ layout_map = {
 }
 
 method_order = ["scan", "bitmap", "rabit_like"]
-selectivity_order = ["0.1%", "1%", "5%", "10%", "20%", "50%", "90%"]
+selectivity_order = [0.1, 1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90]
 
 
-def extract_selectivity(query_name: str) -> str:
-    m = re.search(r'_(0_1|1|5|10|20|50|90)_pct$', query_name)
+def extract_selectivity(query_name: str):
+    m = re.search(r'_(0_1|1|5|10|20|30|40|50|60|70|80|90)_pct$', query_name)
     if not m:
-        return query_name
-    return m.group(1).replace("_", ".") + "%"
+        return None
+    return float(m.group(1).replace("_", "."))
 
 
-# =========================================================
-# Preprocess
-# =========================================================
+# preprocess
 results_df["layout"] = results_df["table_name"].map(layout_map)
 summary_df["layout"] = summary_df["table_name"].map(layout_map)
 
 results_df["selectivity"] = results_df["query_name"].apply(extract_selectivity)
 summary_df["selectivity"] = summary_df["query_name"].apply(extract_selectivity)
 
-results_df["selectivity"] = pd.Categorical(
-    results_df["selectivity"], categories=selectivity_order, ordered=True
-)
-summary_df["selectivity"] = pd.Categorical(
-    summary_df["selectivity"], categories=selectivity_order, ordered=True
-)
+results_df = results_df.dropna(subset=["selectivity"])
+summary_df = summary_df.dropna(subset=["selectivity"])
 
-# =========================================================
-# 1. Correctness check
-# Same query should produce the same result for all methods
-# =========================================================
+results_df = results_df.sort_values(["layout", "selectivity"])
+summary_df = summary_df.sort_values(["layout", "selectivity"])
+
+# correctness check
 correctness = (
     results_df.groupby(["layout", "query_name", "run_id"])["result"]
     .nunique()
@@ -64,27 +51,28 @@ else:
     print("Warning: some queries have mismatched results across methods.")
     print(correctness[correctness["num_distinct_results"] != 1])
 
-# Save correctness report
 correctness.to_csv("layout_correctness_check.csv", index=False)
 
-# =========================================================
-# 2. Save report tables
-# =========================================================
+# save report table
 table_df = (
     summary_df.pivot_table(
         index=["layout", "selectivity"],
         columns="method",
-        values="avg_time_sec"
+        values="avg_time_sec",
+        aggfunc="mean"
     )
     .reset_index()
 )
 
-# Reorder columns if present
+# flatten column names just in case
+table_df.columns = [c if isinstance(c, str) else c[1] if c[1] else c[0] for c in table_df.columns]
+
 cols = ["layout", "selectivity"] + [c for c in method_order if c in table_df.columns]
 table_df = table_df[cols]
 
 table_df = table_df.sort_values(["layout", "selectivity"])
 table_df_rounded = table_df.copy()
+
 for c in method_order:
     if c in table_df_rounded.columns:
         table_df_rounded[c] = table_df_rounded[c].round(6)
@@ -98,67 +86,87 @@ print("\nSaved tables:")
 print("- table_layout_selectivity.csv")
 print("- table_layout_selectivity.md")
 
-# =========================================================
-# 3. Figure by layout: one figure per layout
-# =========================================================
+# Figure by layout
 for layout in ["Random", "Sorted", "Block-Sorted"]:
     subset = summary_df[summary_df["layout"] == layout]
 
-    pivot = subset.pivot(index="selectivity", columns="method", values="avg_time_sec")
+    pivot = subset.pivot_table(
+        index="selectivity",
+        columns="method",
+        values="avg_time_sec",
+        aggfunc="mean"
+    )
     pivot = pivot.reindex(selectivity_order)
 
     plt.figure(figsize=(8, 5))
+    x = pivot.index.astype(float)
+
+    plotted = False
     for method in method_order:
         if method in pivot.columns:
-            plt.plot(pivot.index, pivot[method], marker="o", label=method)
+            plt.plot(x, pivot[method], marker="o", label=method)
+            plotted = True
 
-    plt.xlabel("Selectivity")
+    plt.xlabel("Selectivity (%)")
     plt.ylabel("Average Time (second)")
     plt.title(f"{layout} Layout: Scan vs Bitmap vs RABIT")
-    plt.legend()
+    plt.xticks(selectivity_order, [f"{v}%" for v in selectivity_order])
+
+    if plotted:
+        plt.legend()
+
     plt.tight_layout()
     filename = f"figure_{layout.lower().replace('-', '_')}_layout.png"
     plt.savefig(filename, dpi=200)
     plt.close()
     print(f"Saved: {filename}")
 
-# =========================================================
-# 4. Figure by method: compare layouts
-# One figure per method
-# =========================================================
+# Figure by method
 for method in method_order:
     subset = summary_df[summary_df["method"] == method]
 
-    pivot = subset.pivot(index="selectivity", columns="layout", values="avg_time_sec")
+    pivot = subset.pivot_table(
+        index="selectivity",
+        columns="layout",
+        values="avg_time_sec",
+        aggfunc="mean"
+    )
     pivot = pivot.reindex(selectivity_order)
 
     plt.figure(figsize=(8, 5))
+    x = pivot.index.astype(float)
+
+    plotted = False
     for layout in ["Random", "Sorted", "Block-Sorted"]:
         if layout in pivot.columns:
-            plt.plot(pivot.index, pivot[layout], marker="o", label=layout)
+            plt.plot(x, pivot[layout], marker="o", label=layout)
+            plotted = True
 
-    plt.xlabel("Selectivity")
+    plt.xlabel("Selectivity (%)")
     plt.ylabel("Average Time (second)")
-    plt.title(f"{method}Layouts")
-    plt.legend()
+    plt.title(f"{method} Across Layouts")
+    plt.xticks(selectivity_order, [f"{v}%" for v in selectivity_order])
+
+    if plotted:
+        plt.legend()
+
     plt.tight_layout()
     filename = f"figure_{method}_layout_compare.png"
     plt.savefig(filename, dpi=200)
     plt.close()
     print(f"Saved: {filename}")
 
-# =========================================================
-# 5. Speedup figure: bitmap / rabit_like
-# >1 means RABIT-like is faster
-# =========================================================
-speedup_df = (
-    summary_df.pivot_table(
-        index=["layout", "selectivity"],
-        columns="method",
-        values="avg_time_sec"
-    )
-    .reset_index()
-)
+# Speedup figure
+speedup_df = summary_df.pivot_table(
+    index=["layout", "selectivity"],
+    columns="method",
+    values="avg_time_sec",
+    aggfunc="mean"
+).reset_index()
+
+speedup_df.columns = [c if isinstance(c, str) else c[1] if c[1] else c[0] for c in speedup_df.columns]
+
+print("\nSpeedup columns:", speedup_df.columns.tolist())
 
 speedup_df["bitmap_over_rabit_speedup"] = speedup_df["bitmap"] / speedup_df["rabit_like"]
 speedup_df["bitmap_over_rabit_speedup"] = speedup_df["bitmap_over_rabit_speedup"].round(4)
@@ -167,39 +175,35 @@ speedup_df.to_csv("table_bitmap_rabit_speedup.csv", index=False)
 plt.figure(figsize=(8, 5))
 for layout in ["Random", "Sorted", "Block-Sorted"]:
     subset = speedup_df[speedup_df["layout"] == layout].copy()
-    subset["selectivity"] = pd.Categorical(
-        subset["selectivity"], categories=selectivity_order, ordered=True
-    )
     subset = subset.sort_values("selectivity")
+
     plt.plot(
-        subset["selectivity"],
+        subset["selectivity"].astype(float),
         subset["bitmap_over_rabit_speedup"],
         marker="o",
         label=layout
     )
 
-plt.xlabel("Selectivity")
+plt.xlabel("Selectivity (%)")
 plt.ylabel("Bitmap / RABIT speedup")
-plt.title("speedup of RABIT over bitmap")
+plt.title("Speedup of RABIT over Bitmap")
+plt.xticks(selectivity_order, [f"{v}%" for v in selectivity_order])
 plt.legend()
 plt.tight_layout()
 plt.savefig("figure_bitmap_vs_rabit_speedup.png", dpi=200)
 plt.close()
 print("Saved: figure_bitmap_vs_rabit_speedup.png")
 
-# =========================================================
-# 6. Print concise summary statistics
-# =========================================================
+# summary stats
 mean_by_layout_method = (
     summary_df.groupby(["layout", "method"])["avg_time_sec"]
     .mean()
     .reset_index()
 )
 
-print("\naverage time by layout")
+print("\nAverage time by layout")
 print(mean_by_layout_method.to_string(index=False))
 
-# save
 mean_by_layout_method.to_csv("table_mean_by_layout_method.csv", index=False)
 
 print("\nSaved:")
@@ -210,5 +214,5 @@ print("- figure_sorted_layout.png")
 print("- figure_block_sorted_layout.png")
 print("- figure_scan_layout_compare.png")
 print("- figure_bitmap_layout_compare.png")
-print("- figure_rabit_layout_compare.png")
+print("- figure_rabit_like_layout_compare.png")
 print("- figure_bitmap_vs_rabit_speedup.png")

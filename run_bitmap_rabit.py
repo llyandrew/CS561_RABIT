@@ -10,33 +10,47 @@ RUNS = 3
 
 WORKLOADS = [
 
-    #random
+    # random
     {"query_name": "random_0_1_pct", "table": "t_layout_random", "low": 100000, "high": 100999},
-    {"query_name": "random_1_pct", "table": "t_layout_random", "low": 100000, "high": 109999},
-    {"query_name": "random_5_pct", "table": "t_layout_random", "low": 100000, "high": 149999},
-    {"query_name": "random_10_pct", "table": "t_layout_random", "low": 100000, "high": 199999},
-    {"query_name": "random_20_pct", "table": "t_layout_random", "low": 100000, "high": 299999},
-    {"query_name": "random_50_pct", "table": "t_layout_random", "low": 100000, "high": 599999},
-    {"query_name": "random_90_pct", "table": "t_layout_random", "low": 0, "high": 899999},
+    {"query_name": "random_1_pct",   "table": "t_layout_random", "low": 100000, "high": 109999},
+    {"query_name": "random_5_pct",   "table": "t_layout_random", "low": 100000, "high": 149999},
+    {"query_name": "random_10_pct",  "table": "t_layout_random", "low": 100000, "high": 199999},
+    {"query_name": "random_20_pct",  "table": "t_layout_random", "low": 100000, "high": 299999},
+    {"query_name": "random_30_pct",  "table": "t_layout_random", "low": 100000, "high": 399999},
+    {"query_name": "random_40_pct",  "table": "t_layout_random", "low": 100000, "high": 499999},
+    {"query_name": "random_50_pct",  "table": "t_layout_random", "low": 100000, "high": 599999},
+    {"query_name": "random_60_pct",  "table": "t_layout_random", "low": 100000, "high": 699999},
+    {"query_name": "random_70_pct",  "table": "t_layout_random", "low": 100000, "high": 799999},
+    {"query_name": "random_80_pct",  "table": "t_layout_random", "low": 100000, "high": 899999},
+    {"query_name": "random_90_pct",  "table": "t_layout_random", "low": 0,      "high": 899999},
 
-    #sorted
+    # sorted
     {"query_name": "sorted_0_1_pct", "table": "t_layout_sorted", "low": 100000, "high": 100999},
-    {"query_name": "sorted_1_pct", "table": "t_layout_sorted", "low": 100000, "high": 109999},
-    {"query_name": "sorted_5_pct", "table": "t_layout_sorted", "low": 100000, "high": 149999},
-    {"query_name": "sorted_10_pct", "table": "t_layout_sorted", "low": 100000, "high": 199999},
-    {"query_name": "sorted_20_pct", "table": "t_layout_sorted", "low": 100000, "high": 299999},
-    {"query_name": "sorted_50_pct", "table": "t_layout_sorted", "low": 100000, "high": 599999},
-    {"query_name": "sorted_90_pct", "table": "t_layout_sorted", "low": 0, "high": 899999},
+    {"query_name": "sorted_1_pct",   "table": "t_layout_sorted", "low": 100000, "high": 109999},
+    {"query_name": "sorted_5_pct",   "table": "t_layout_sorted", "low": 100000, "high": 149999},
+    {"query_name": "sorted_10_pct",  "table": "t_layout_sorted", "low": 100000, "high": 199999},
+    {"query_name": "sorted_20_pct",  "table": "t_layout_sorted", "low": 100000, "high": 299999},
+    {"query_name": "sorted_30_pct",  "table": "t_layout_sorted", "low": 100000, "high": 399999},
+    {"query_name": "sorted_40_pct",  "table": "t_layout_sorted", "low": 100000, "high": 499999},
+    {"query_name": "sorted_50_pct",  "table": "t_layout_sorted", "low": 100000, "high": 599999},
+    {"query_name": "sorted_60_pct",  "table": "t_layout_sorted", "low": 100000, "high": 699999},
+    {"query_name": "sorted_70_pct",  "table": "t_layout_sorted", "low": 100000, "high": 799999},
+    {"query_name": "sorted_80_pct",  "table": "t_layout_sorted", "low": 100000, "high": 899999},
+    {"query_name": "sorted_90_pct",  "table": "t_layout_sorted", "low": 0,      "high": 899999},
 
-    #block-sorted
+    # block-sorted
     {"query_name": "block_sorted_0_1_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 100999},
-    {"query_name": "block_sorted_1_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 109999},
-    {"query_name": "block_sorted_5_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 149999},
-    {"query_name": "block_sorted_10_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 199999},
-    {"query_name": "block_sorted_20_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 299999},
-    {"query_name": "block_sorted_50_pct", "table": "t_layout_block_sorted", "low": 100000, "high": 599999},
-    {"query_name": "block_sorted_90_pct", "table": "t_layout_block_sorted", "low": 0, "high": 899999},
-
+    {"query_name": "block_sorted_1_pct",   "table": "t_layout_block_sorted", "low": 100000, "high": 109999},
+    {"query_name": "block_sorted_5_pct",   "table": "t_layout_block_sorted", "low": 100000, "high": 149999},
+    {"query_name": "block_sorted_10_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 199999},
+    {"query_name": "block_sorted_20_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 299999},
+    {"query_name": "block_sorted_30_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 399999},
+    {"query_name": "block_sorted_40_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 499999},
+    {"query_name": "block_sorted_50_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 599999},
+    {"query_name": "block_sorted_60_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 699999},
+    {"query_name": "block_sorted_70_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 799999},
+    {"query_name": "block_sorted_80_pct",  "table": "t_layout_block_sorted", "low": 100000, "high": 899999},
+    {"query_name": "block_sorted_90_pct",  "table": "t_layout_block_sorted", "low": 0,      "high": 899999},
 ]
 
 
